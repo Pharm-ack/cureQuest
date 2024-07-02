@@ -7,18 +7,23 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import prisma from "@/lib/db";
 import Link from "next/link";
+import { fetchBlogPost } from "@/lib/post";
 
-export default async function Blog() {
-  const posts = await prisma.post.findMany();
+export default async function BlogList() {
+  const { posts } = await fetchBlogPost();
+
+  if (!posts || posts.length === 0) {
+    return <div>No posts available</div>;
+  }
+
   return (
     <div className="w-full max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-16">
       <div className="grid md:grid-cols-[2fr_1fr] gap-8">
         <div className="">
           <h1 className="text-3xl font-bold mb-6">All Blog Posts</h1>
           <div className="grid gap-8">
-            {posts.map((post) => (
+            {posts?.map((post) => (
               <div
                 key={post.id}
                 className="grid md:grid-cols-[200px_1fr] gap-4 items-start"
@@ -33,7 +38,7 @@ export default async function Blog() {
                 <Link href={`/blogs/${post.slug}`}>
                   <h2 className="text-xl font-semibold mb-2">{post.title}</h2>
                   <div className="text-gray-500 mb-2">
-                    <span>John Doe</span>
+                    <span>{post.author.name}</span>
                     <span className="mx-2">•</span>
                     <span>
                       {new Date(post.createdAt).toLocaleDateString("en-US", {
@@ -78,7 +83,7 @@ export default async function Blog() {
           </div>
         </div>
 
-        <div className="">
+        {/* <div className="">
           <h2 className="text-2xl font-bold mb-4">Related Posts</h2>
           <div className="grid gap-4">
             <div className="grid grid-cols-[50px_1fr] gap-4 items-start">
@@ -127,7 +132,7 @@ export default async function Blog() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

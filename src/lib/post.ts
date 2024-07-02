@@ -1,5 +1,6 @@
 import { Post } from "@prisma/client";
 import prisma from "./db";
+import { unstable_cache } from "next/cache";
 
 const ITEM_PER_PAGE = 4;
 export async function filteredPost(
@@ -51,3 +52,20 @@ export async function fetchPostPages(query: string): Promise<number> {
     throw error;
   }
 }
+
+export const fetchBlogPost = unstable_cache(async () => {
+  try {
+    const posts = await prisma.post.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { author: true },
+    });
+    if (!posts || posts.length === 0) {
+      return { posts: [] };
+    } else {
+      return { posts };
+    }
+  } catch (error) {
+    console.error("Error fetching blog posts:", error);
+    return { error: "Error fetching blog posts", posts: [] };
+  }
+});

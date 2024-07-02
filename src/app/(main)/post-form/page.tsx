@@ -12,10 +12,12 @@ import { useState } from "react";
 import { PostSchema } from "@/schema/index";
 import { LuLoader2 } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
-import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { createUploadThingHook } from "@/lib/uploadthing";
 import Image from "next/image";
+
+import dynamic from "next/dynamic";
+const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
 const uploadHook = createUploadThingHook({
   url: "http://localhost:3000/api/uploadthing",

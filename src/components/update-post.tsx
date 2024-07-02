@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -14,8 +13,9 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { LuLoader2 } from "react-icons/lu";
 import { createUploadThingHook } from "@/lib/uploadthing";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import dynamic from "next/dynamic";
+
+const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
 const uploadHook = createUploadThingHook({
   url: "http://localhost:3000/api/uploadthing",
@@ -172,8 +172,8 @@ export default function UpdatePostForm({ postId }: { postId: string }) {
           {imageUrl && (
             <Image
               src={imageUrl}
-              width={150}
-              height={150}
+              width={371}
+              height={459}
               alt="Preview"
               className="w-32 h-32 object-cover rounded-md"
             />

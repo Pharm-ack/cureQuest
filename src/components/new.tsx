@@ -4,6 +4,8 @@ import Link from "next/link";
 
 export default async function New() {
   const posts = await prisma.post.findMany({
+    include: { author: true },
+    orderBy: { createdAt: "desc" },
     take: 3,
   });
 
@@ -55,7 +57,9 @@ export default async function New() {
                   </p>
                   <div className="mx-auto flex max-w-[480px] flex-row items-center text-left">
                     <div className="flex flex-col items-start">
-                      <h6 className="text-base font-semibold">Laila Bahar</h6>
+                      <h6 className="text-base font-semibold">
+                        {post.author.name}
+                      </h6>
                       <div className="flex items-start max-[991px]:flex-col lg:items-center">
                         <p className="text-sm text-[#636262]">
                           {new Date(post.createdAt).toLocaleDateString(

@@ -49,8 +49,8 @@ export default function Header() {
           <div className="hidden md:block">
             <nav aria-label="Global">
               <ul className="flex items-center gap-6">
-                {routes.map((route, idx) => (
-                  <li key={`route-${idx}`}>
+                {routes.map((route) => (
+                  <li key={route.link}>
                     <Link
                       className="text-sm font-medium hover:underline underline-offset-4"
                       href={route.link}
@@ -117,8 +117,8 @@ export default function Header() {
               </SheetTrigger>
               <SheetContent side="left" className="w-64 bg-gray-50">
                 <ul className="flex flex-col gap-y-6 text-sm p-2">
-                  {routes.map((route, idx) => (
-                    <li key={`route-${idx}`}>
+                  {routes.map((route) => (
+                    <li key={route.link}>
                       <Link
                         className="text-gray-900 hover:underline hover:text-gray-900"
                         href={route.link}
