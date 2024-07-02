@@ -1,4 +1,4 @@
-import UpdatePostForm from "@/app/(main)/posts/edit/page";
+import UpdatePostForm from "@/components/update-post";
 
 export default function EditPostPage({ params }: { params: { id: string } }) {
   return (
