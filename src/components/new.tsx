@@ -45,7 +45,7 @@ export default async function New() {
                 />
                 <div className="w-full pt-4">
                   <Link
-                    href={`/blogs/${post.slug}`}
+                    href={`/blog/${post.slug}`}
                     className="text-xl font-semibold hover:underline"
                   >
                     {post.title}
