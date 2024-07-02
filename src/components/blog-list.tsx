@@ -35,7 +35,7 @@ export default async function BlogList() {
                   height={150}
                   className="rounded-lg object-cover"
                 />
-                <Link href={`/blogs/${post.slug}`}>
+                <Link href={`/blog/${post.slug}`}>
                   <h2 className="text-xl font-semibold mb-2">{post.title}</h2>
                   <div className="text-gray-500 mb-2">
                     <span>{post.author.name}</span>
