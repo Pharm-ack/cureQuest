@@ -1,8 +1,11 @@
+"use client";
 import { useFormStatus } from "react-dom";
 import { LuLoader2 } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
 
-export default function DonateBtn() {
+import { signOut } from "next-auth/react";
+
+export function DonateBtn() {
   const { pending } = useFormStatus();
   return (
     <>
@@ -17,4 +20,9 @@ export default function DonateBtn() {
       )}
     </>
   );
+}
+
+export function SignoutBtn() {
+ 
+  return <button onClick={() => signOut({callbackUrl: "/login"})}>Logout</button>;
 }

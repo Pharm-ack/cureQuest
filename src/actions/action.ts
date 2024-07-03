@@ -1,6 +1,6 @@
 "use server";
 
-import { auth, signIn, signOut } from "@/auth";
+import { auth, signIn } from "@/auth";
 import prisma from "@/lib/db";
 import { getUserByEmail } from "@/lib/user";
 import { DonationSchema, PostSchema, RegisterSchema } from "@/schema";
@@ -32,6 +32,7 @@ export async function login(
     }
     throw error;
   }
+  // return { success: true };
 }
 
 //  -- User Sigin Up --
@@ -55,7 +56,7 @@ export async function signup(formData: FormData) {
   const existingUser = await getUserByEmail(email);
 
   if (existingUser) {
-    return { error: "User already exists!" };
+    return { error: "Email already exists!" };
   }
 
   await prisma.user.create({
@@ -65,12 +66,6 @@ export async function signup(formData: FormData) {
       name,
     },
   });
-
-  // await signIn("credentials", formData);
-}
-
-export async function logOut() {
-  await signOut({ redirectTo: "/" });
 }
 
 export async function googleLogin() {
@@ -111,11 +106,12 @@ export async function createPost(formData: FormData) {
         authorId,
       },
     });
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     return { error: "Failed to create post." };
   } finally {
-    redirect("/posts");
+    redirect("/dashboard/posts");
   }
 }
 
@@ -180,7 +176,7 @@ export async function updatePost(postId: string, formData: FormData) {
   } catch (error) {
     return { error: "Failed to update post." };
   } finally {
-    redirect("/posts");
+    redirect("/dashboard/posts");
   }
 }
 
@@ -195,7 +191,31 @@ export async function deletePost(postId: string) {
   } catch (error) {
     return { error: "Failed to delete post." };
   } finally {
-    revalidatePath("/posts");
+    revalidatePath("/dashboard/posts");
+  }
+}
+
+export async function deleteUser(userId: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    // If the user is an admin, prevent deletion
+    if (user && user.role !== "ADMIN") {
+      return { error: "Only admin can perform this action." };
+    }
+
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+
+    return { success: true };
+  } catch (error) {
+    return { error: "Failed to delete user." };
+  } finally {
+    revalidatePath("/dashboard/users");
   }
 }
 
@@ -230,8 +250,14 @@ export async function createDonation(prevState: unknown, formData: FormData) {
       },
     ],
     mode: "payment",
-    success_url: "http://localhost:3000/payment/success",
-    cancel_url: "http://localhost:3000/payment/cancel",
+    success_url:
+      process.env.NODE_ENV === "development"
+        ? "http://localhost:3000/payment/success"
+        : "https://cure-quest-ph.vercel.app/payment/success",
+    cancel_url:
+      process.env.NODE_ENV === "development"
+        ? "http://localhost:3000/payment/cancel"
+        : "https://cure-quest-ph.vercel.app/payment/cancel",
     metadata: {
       name: name,
       comments: comments,

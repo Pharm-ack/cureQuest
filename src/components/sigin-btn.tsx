@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "./ui/button";
+
 type SiginBtnProps = {
   onClick: () => void;
   children?: React.ReactNode;
@@ -7,12 +9,8 @@ type SiginBtnProps = {
 
 export default function SiginBtn({ onClick, children }: SiginBtnProps) {
   return (
-    <button
-      onClick={onClick}
-      type="submit"
-      className="flex items-center justify-center w-full px-6 py-2 mx-2 text-sm font-medium text-white transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:bg-blue-400 focus:outline-none"
-    >
+    <Button onClick={onClick} variant="outline" className="w-full">
       {children}
-    </button>
+    </Button>
   );
 }

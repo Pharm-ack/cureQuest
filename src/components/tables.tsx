@@ -6,8 +6,7 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import DeleteBtn from "./delete-btn";
-import prisma from "@/lib/db";
+import {DeleteBtn} from "./delete-btn";
 import { TbFilePencil } from "react-icons/tb";
 import { Button } from "./ui/button";
 import Link from "next/link";
@@ -45,12 +44,12 @@ export default async function Tables({ query, currentPage }: TablesProps) {
             </TableCell>
             <TableCell className="text-right">
               <Button variant="ghost" size="icon">
-                <Link href={`/posts/edit/${post.id}`}>
+                <Link href={`/dashboard/post/edit/${post.id}`}>
                   <TbFilePencil className="h-4 w-4" />
                 </Link>
                 <span className="sr-only">Edit</span>
               </Button>
-              <DeleteBtn postId={post.id} />
+              <DeleteBtn postId={post.id}  />
             </TableCell>
           </TableRow>
         ))}

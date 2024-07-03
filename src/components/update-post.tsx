@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -13,15 +14,19 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { LuLoader2 } from "react-icons/lu";
 import { createUploadThingHook } from "@/lib/uploadthing";
-import dynamic from "next/dynamic";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+// Ensure the correct types for props
+interface UpdatePostFormProps {
+  postId: string;
+}
 
 const uploadHook = createUploadThingHook({
   url: "http://localhost:3000/api/uploadthing",
 });
 
-export default function UpdatePostForm({ postId }: { postId: string }) {
+const UpdatePostForm: React.FC<UpdatePostFormProps> = ({ postId }) => {
   const [imageUrl, setImageUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [content, setContent] = useState("");
@@ -93,9 +98,7 @@ export default function UpdatePostForm({ postId }: { postId: string }) {
 
     const response = await updatePost(postId, formData);
     if (response?.error) {
-      toast.error("Error", {
-        description: "Could not update post. Please try again.",
-      });
+      toast.error("Could not update post. Please try again.");
       return;
     }
 
@@ -172,8 +175,8 @@ export default function UpdatePostForm({ postId }: { postId: string }) {
           {imageUrl && (
             <Image
               src={imageUrl}
-              width={371}
-              height={459}
+              width={150}
+              height={150}
               alt="Preview"
               className="w-32 h-32 object-cover rounded-md"
             />
@@ -192,4 +195,6 @@ export default function UpdatePostForm({ postId }: { postId: string }) {
       </div>
     </form>
   );
-}
+};
+
+export default UpdatePostForm;

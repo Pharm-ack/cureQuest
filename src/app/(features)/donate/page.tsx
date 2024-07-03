@@ -11,7 +11,7 @@ import { parseWithZod } from "@conform-to/zod";
 import { useFormState } from "react-dom";
 import { DonationSchema } from "@/schema";
 import { createDonation } from "@/actions/action";
-import DonateBtn from "@/components/donate-btn";
+import { DonateBtn } from "@/components/custom-btn";
 
 export default function Component() {
   const [lastResult, action] = useFormState(createDonation, undefined);

@@ -1,6 +1,5 @@
 "use client";
 import { usePathname, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import {
   Pagination,
   PaginationContent,
@@ -22,7 +21,7 @@ export default function Paginations({ totalPages }: { totalPages: number }) {
   };
 
   return (
-    <div className="flex mt-auto">
+    <div className="flex">
       <Pagination>
         <PaginationContent>
           <PaginationItem>

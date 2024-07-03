@@ -1,6 +1,5 @@
 import Hero from "@/components/hero";
-import New from "@/components/new";
-import NewsPage from "@/components/news";
+import News from "@/components/news";
 import ResearchPage from "@/components/research";
 import AnimatedLogoCloud from "@/components/ui/animated-logo";
 
@@ -9,8 +8,7 @@ export default function Home() {
     <main>
       <Hero />
       <ResearchPage />
-      {/* <NewsPage /> */}
-      <New />
+      <News />
       <AnimatedLogoCloud />
     </main>
   );

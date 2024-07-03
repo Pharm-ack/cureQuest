@@ -18,48 +18,48 @@ const logos = [
   {
     id: 1,
     name: "Vercel",
-    url: "https://res.cloudinary.com/dfhp33ufc/image/upload/v1715881430/vercel_wordmark_dark_mhv8u8.svg",
+    url: "/stjude.png",
   },
   {
     id: 2,
     name: "Nextjs",
-    url: "https://res.cloudinary.com/dfhp33ufc/image/upload/v1715881475/nextjs_logo_dark_gfkf8m.svg",
+    url: "/pakistan.jpeg",
   },
   {
     id: 3,
     name: "Prime",
-    url: "https://res.cloudinary.com/dfhp33ufc/image/upload/v1715276558/logos/t2awrrfzdvmg1chnzyfr.svg",
+    url: "/chmlogo.png",
   },
   {
     id: 4,
     name: "Trustpilot",
-    url: "https://res.cloudinary.com/dfhp33ufc/image/upload/v1715276558/logos/tkfspxqmjflfllbuqxsi.svg",
+    url: "/authism.png",
   },
   {
     id: 5,
     name: "Webflow",
-    url: "https://res.cloudinary.com/dfhp33ufc/image/upload/v1715276560/logos/nymiivu48d5lywhf9rpf.svg",
+    url: "/cancer.jpeg",
   },
 
   {
     id: 6,
     name: "Airbnb",
-    url: "https://res.cloudinary.com/dfhp33ufc/image/upload/v1715276558/logos/pmblusboe7vkw8vxdknx.svg",
+    url: "/download.png",
   },
   {
     id: 7,
     name: "Tina",
-    url: "https://res.cloudinary.com/dfhp33ufc/image/upload/v1715276560/logos/afqhiygywyphuou6xtxc.svg",
+    url: "/download (1).png",
   },
   {
     id: 8,
     name: "Stackoverflow",
-    url: "https://res.cloudinary.com/dfhp33ufc/image/upload/v1715276558/logos/ts1j4mkooxqmscgptafa.svg",
+    url: "/images.png",
   },
   {
     id: 9,
     name: "mistral",
-    url: "https://res.cloudinary.com/dfhp33ufc/image/upload/v1715276558/logos/tyos2ayezryjskox3wzs.svg",
+    url: "/download (2).png",
   },
 ];
 

@@ -37,7 +37,7 @@ export default function page() {
                     <p>Pharmack</p>
                   </div>
                   <Button className="w-fit" variant="outline" size="sm">
-                    <Link href="/settings">Update profile</Link>
+                    <Link href="#">Update profile</Link>
                   </Button>
                 </div>
               </div>
