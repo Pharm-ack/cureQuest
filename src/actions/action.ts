@@ -250,6 +250,7 @@ export async function createDonation(prevState: unknown, formData: FormData) {
       },
     ],
     mode: "payment",
+<<<<<<< HEAD
     success_url:
       process.env.NODE_ENV === "development"
         ? "http://localhost:3000/payment/success"
@@ -258,6 +259,14 @@ export async function createDonation(prevState: unknown, formData: FormData) {
       process.env.NODE_ENV === "development"
         ? "http://localhost:3000/payment/cancel"
         : "https://cure-quest-ph.vercel.app/payment/cancel",
+=======
+    success_url: process.env.NODE_ENV === "development"
+          ? "http://localhost:3000/payment/success"
+          : "https://cure-quest-ph.vercel.app/payment/success",
+    cancel_url: process.env.NODE_ENV === "development"
+          ? "http://localhost:3000/payment/cancel"
+          : "https://cure-quest-ph.vercel.app/payment/cancel",
+>>>>>>> 8a04a4523395d91d4514e4f088b6c4eddc4221c6
     metadata: {
       name: name,
       comments: comments,
