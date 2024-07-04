@@ -1,5 +1,5 @@
 "use client";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Pagination,
   PaginationContent,
@@ -19,7 +19,6 @@ export default function Paginations({ totalPages }: { totalPages: number }) {
     params.set("page", pageNumber.toString());
     return `${pathName}?${params.toString()}`;
   };
-
   return (
     <div className="flex">
       <Pagination>

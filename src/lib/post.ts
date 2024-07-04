@@ -1,5 +1,7 @@
 import { Post } from "@prisma/client";
 import prisma from "./db";
+import { cache } from "react";
+import { unstable_noStore } from "next/cache";
 
 const ITEM_PER_PAGE = 4;
 export async function filteredPost(
@@ -52,17 +54,25 @@ export async function fetchPostPages(query: string): Promise<number> {
   }
 }
 
-export async function fetchBlogPost(page: number, itemsPerPage: number) {
-  const skip = (page - 1) * itemsPerPage;
-  const posts = await prisma.post.findMany({
-    skip: skip,
-    take: itemsPerPage,
-    orderBy: { createdAt: "desc" },
-    include: { author: true },
-  });
+export const getPosts = async (page = 1, limit = 2) => {
+  unstable_noStore();
+  const skip = (page - 1) * limit;
 
-  const totalPosts = await prisma.post.count();
-  const totalPages = Math.ceil(totalPosts / itemsPerPage);
+  const [posts, totalPosts] = await prisma.$transaction([
+    prisma.post.findMany({
+      skip,
+      take: limit,
+      orderBy: { createdAt: "desc" },
+      include: { author: { select: { name: true } } },
+    }),
+    prisma.post.count(),
+  ]);
 
-  return { posts, totalPages, currentPage: page };
-}
+  const totalPages = Math.ceil(totalPosts / limit);
+
+  return {
+    posts,
+    totalPages,
+    currentPage: page,
+  };
+};

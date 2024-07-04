@@ -1,27 +1,29 @@
 import Image from "next/image";
 import Link from "next/link";
-import { fetchBlogPost } from "@/lib/post";
+import { getPosts } from "@/lib/post";
 import parse from "html-react-parser";
 import Paginations from "./paginations";
-import React from "react";
-export const dynamic = "force-dynamic";
-type BlogListProps = {
-  searchParams?: {
-    page?: string;
-  };
-};
 
-export default async function BlogList({ searchParams }: BlogListProps) {
-  const currentPage = Number(searchParams?.page) || 1;
-  const itemsPerPage = 4;
-  const { posts, totalPages } = await fetchBlogPost(currentPage, itemsPerPage);
+export default async function BlogList({
+  searchParams,
+}: {
+  searchParams: any;
+}) {
+  const currentPage = Number(searchParams.page) || 1;
+
+  console.log("current page", currentPage);
+
+  const { posts, totalPages } = await getPosts(currentPage);
 
   if (!posts || posts.length === 0) {
     return <div>No posts available</div>;
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-16">
+    <div
+      key={currentPage}
+      className="w-full max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-16"
+    >
       <div className="grid md:grid-cols-[2fr_1fr] gap-8">
         <div className="">
           <h1 className="text-3xl font-bold mb-6">All Blog Posts</h1>

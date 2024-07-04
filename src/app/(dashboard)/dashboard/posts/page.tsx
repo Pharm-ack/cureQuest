@@ -4,7 +4,8 @@ import Tables from "@/components/tables";
 import { Button } from "@/components/ui/button";
 import { fetchPostPages } from "@/lib/post";
 import Link from "next/link";
-
+import { Suspense } from "react";
+import Loading from "./loading";
 
 type postPageProps = {
   searchParams?: {
@@ -31,7 +32,9 @@ export default async function postPage({ searchParams }: postPageProps) {
             <Search />
           </div>
         </div>
-        <Tables query={query} currentPage={currentPage} />
+        <Suspense fallback={<Loading />}>
+          <Tables query={query} currentPage={currentPage} />
+        </Suspense>
       </div>
       <Paginations totalPages={totalPages} />
     </main>

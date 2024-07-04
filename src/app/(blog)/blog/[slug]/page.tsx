@@ -10,6 +10,7 @@ export default async function BlogPage({
   const slug = params.slug;
   const blog = await prisma.post.findUnique({
     where: { slug },
+    include: { author: { select: { name: true } } },
   });
 
   if (!blog) {
@@ -29,7 +30,7 @@ export default async function BlogPage({
               day: "2-digit",
               year: "numeric",
             })}
-            — Written by Praveen Juge
+            — Written by {blog.author.name}
           </p>
         </div>
         <div className="flex items-center mb-6 space-x-2">
