@@ -119,33 +119,7 @@ export default function Header() {
                         </Link>
                       </li>
                     ))}
-                    {session && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="rounded-full border border-gray-200 w-8 h-8"
-                          >
-                            <Avatar>
-                              <AvatarImage src="https://github.com/shadcn.png" />
-                              <AvatarFallback>CN</AvatarFallback>
-                            </Avatar>
-
-                            <span className="sr-only">Toggle user menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start">
-                          <DropdownMenuLabel>John Doe</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem>
-                            <Link href="/profile">Profile</Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>Settings</DropdownMenuItem>
-                          <DropdownMenuItem>Logout</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
+                    
                   </ul>
                 </SheetContent>
               </Sheet>
