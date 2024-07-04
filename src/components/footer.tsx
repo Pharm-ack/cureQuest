@@ -9,17 +9,18 @@ const routes = [
     name: "About",
     link: "/about",
   },
-  {
-    name: "Research",
-    link: "/research",
-  },
+
   {
     name: "Blog",
-    link: "/blog",
+    link: "/blogs",
   },
   {
     name: "Contact",
     link: "/contact",
+  },
+  {
+    name: "Donate",
+    link: "/donate",
   },
 ];
 
