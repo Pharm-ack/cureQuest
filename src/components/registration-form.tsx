@@ -1,113 +1,249 @@
 "use client";
-import Link from "next/link";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { RiChromeLine } from "react-icons/ri";
-import { Separator } from "@/components/ui/separator";
-import { z } from "zod";
-import { googleLogin, signup } from "@/actions/action";
-import { useForm } from "react-hook-form";
-import { RegisterSchema } from "@/schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import FormError from "./ui/form-error";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import SiginBtn from "./sigin-btn";
-import { Button } from "./ui/button";
 
-export default function RegistrationForm() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<z.infer<typeof RegisterSchema>>({
-    resolver: zodResolver(RegisterSchema),
-  });
+import { useForm } from "@conform-to/react";
+import { parseWithZod } from "@conform-to/zod";
+import { useFormState } from "react-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { AnimatePresence, motion } from "framer-motion";
+import { Icon } from "@iconify/react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { RegisterSchema } from "@/schema";
+import { Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
+import PendingButton from "./pending-button";
+import { useRouter } from "next/navigation";
+import Social from "./socials";
+import { register } from "@/actions/action";
+
+type FormState = {
+  status: "success" | "error" | undefined;
+  message: string;
+};
+
+export default function SignUpForm() {
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [urlError, setUrlError] = useState<string | null>(null);
 
   const router = useRouter();
 
-  async function onSubmit(values: z.infer<typeof RegisterSchema>) {
-    const formData = new FormData();
-    formData.append("name", values.name);
-    formData.append("email", values.email);
-    formData.append("password", values.password);
-
-    const response = await signup(formData);
-
-
-    if(response?.error) {
-      toast.error(response.error);
-    } else {
-      toast.success("User created!");
-      router.push("/login");
+  const [formState, action] = useFormState<FormState, FormData>(
+    async (prevState, formData) => {
+      const result = await register(prevState, formData);
+      if (result.status === "success") {
+        toast.success(result.message);
+        router.push("/auth/login");
+      } else if (result.status === "error") {
+        toast.error(result.message);
+      }
+      return result;
+    },
+    {
+      status: undefined,
+      message: "",
     }
-  }
+  );
+
+  const [form, fields] = useForm({
+    lastResult: formState,
+
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema: RegisterSchema });
+    },
+    shouldValidate: "onBlur",
+    shouldRevalidate: "onInput",
+  });
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const error = searchParams.get("error");
+    if (error === "OAuthAccountNotLinked") {
+      setUrlError("Email already in use with different provider!");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (urlError) {
+      toast.error(urlError);
+      setUrlError(null);
+    }
+  }, [urlError]);
+
+  const variants = {
+    visible: { opacity: 1, y: 0 },
+    hidden: { opacity: 0, y: 10 },
+  };
+
+  const orDivider = (
+    <div className="flex items-center gap-4 py-2">
+      <Separator className="flex-1" />
+      <p className="shrink-0 text-xs text-muted-foreground">OR</p>
+      <Separator className="flex-1" />
+    </div>
+  );
 
   return (
-    <div className="mx-auto px-2 max-w-[450px] space-y-4">
-      <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold">Sign Up</h1>
-        <p className="text-muted-foreground">
-          Create your account to get started.
-        </p>
-      </div>
-      <div>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              {...register("name")}
-              id="name"
-              type="name"
-              name="name"
-              placeholder="John Doe"
-            />
-            {errors.name && (
-              <FormError>{String(errors.name.message)}</FormError>
-            )}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              {...register("email")}
-              id="email"
-              type="email"
-              name="email"
-              placeholder="Johndoe@mail.com"
-            />
-            {errors.email && (
-              <FormError>{String(errors.email.message)}</FormError>
-            )}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              {...register("password")}
-              id="password"
-              type="password"
-              name="password"
-              placeholder="********"
-            />
-            {errors.password && (
-              <FormError>{String(errors.password.message)}</FormError>
-            )}
-          </div>
-          <Button type="submit" className="w-full">
-            Sign Up
-          </Button>
-        </form>
-        <Separator className="my-5" />
+    <div className="flex h-full w-full items-center justify-center">
+      <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg bg-card px-8 pb-10 pt-6 shadow-md">
+        <h1 className="mb-4 text-xl font-medium">Sign Up</h1>
+        <AnimatePresence initial={false} mode="popLayout">
+          {isFormVisible ? (
+            <motion.form
+              id={form.id}
+              onSubmit={form.onSubmit}
+              action={action}
+              noValidate
+              animate="visible"
+              className="flex flex-col gap-y-3"
+              exit="hidden"
+              initial="hidden"
+              variants={variants}
+            >
+              <div className="relative">
+                <Input
+                  autoFocus
+                  required
+                  placeholder="Name"
+                  type="text"
+                  key={fields.name.key}
+                  name={fields.name.name}
+                  defaultValue={fields.name.initialValue}
+                  className={fields.name.errors ? "pr-24" : ""}
+                />
+                {fields.name.errors && (
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <span className="text-red-500 text-xs">
+                      {fields.name.errors}
+                    </span>
+                  </div>
+                )}
+              </div>
 
-        <SiginBtn onClick={() => googleLogin()}>
-          <RiChromeLine className="mr-2 h-4 w-4" />
-          Sign up with Google
-        </SiginBtn>
-        <div className="mt-4 text-center text-sm">
-          Already have an account?{" "}
-          <Link href="/login" className="font-semibold hover:underline">
-            Login
-          </Link>
-        </div>
+              <div className="relative">
+                <Input
+                  required
+                  placeholder="Email Address"
+                  type="email"
+                  key={fields.email.key}
+                  name={fields.email.name}
+                  defaultValue={fields.email.initialValue}
+                  className={fields.email.errors ? "pr-24" : ""}
+                />
+                {fields.email.errors && (
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <span className="text-red-500 text-xs">
+                      {fields.email.errors}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="relative ">
+                <Input
+                  required
+                  placeholder="Password"
+                  type={showPassword ? "text" : "password"}
+                  key={fields.password.key}
+                  name={fields.password.name}
+                  defaultValue={fields.password.initialValue}
+                  className={fields.password.errors ? "pr-24" : ""}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 py-2"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+                {fields.password.errors && (
+                  <div className="absolute inset-y-0 right-8 pr-3 flex items-center pointer-events-none">
+                    <span className="text-red-500 text-xs">
+                      {fields.password.errors}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="relative ">
+                <Input
+                  required
+                  placeholder="Confirm Password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  key={fields.confirmPassword.key}
+                  name={fields.confirmPassword.name}
+                  defaultValue={fields.confirmPassword.initialValue}
+                  className={fields.confirmPassword.errors ? "pr-24" : ""}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 py-2"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+                {fields.confirmPassword.errors && (
+                  <div className="absolute inset-y-0 right-8 pr-3 flex items-center pointer-events-none">
+                    <span className="text-red-500 text-xs">
+                      {fields.confirmPassword.errors}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <PendingButton>Sign Up</PendingButton>
+              {orDivider}
+              <Button
+                className="w-full"
+                variant="outline"
+                onClick={() => setIsFormVisible(false)}
+              >
+                <Icon className="mr-2 h-4 w-4" icon="solar:arrow-left-linear" />
+                Other Sign Up options
+              </Button>
+            </motion.form>
+          ) : (
+            <>
+              <Button className="w-full" onClick={() => setIsFormVisible(true)}>
+                <Icon className="mr-2 h-4 w-4" icon="solar:letter-bold" />
+                Continue with Email
+              </Button>
+              {orDivider}
+              <motion.div
+                animate="visible"
+                className="flex flex-col gap-y-2"
+                exit="hidden"
+                initial="hidden"
+                variants={variants}
+              >
+                <Social />
+                <p className="mt-3 text-center text-sm">
+                  Already have an account?&nbsp;
+                  <Link
+                    href="/auth/login"
+                    className="text-primary hover:underline"
+                  >
+                    Log In
+                  </Link>
+                </p>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

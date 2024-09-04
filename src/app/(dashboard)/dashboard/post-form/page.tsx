@@ -75,8 +75,6 @@ export default function PostForm() {
     formData.append("image", imageUrl);
     formData.append("authorId", session.user.id);
 
-    console.log(imageUrl, content, data);
-
     const response = await createPost(formData);
 
     if (response?.error) {

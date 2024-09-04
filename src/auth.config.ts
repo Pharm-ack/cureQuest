@@ -1,9 +1,9 @@
 import Credentials from "next-auth/providers/credentials";
 import { LoginSchema } from "@/schema/index";
-import { getUserByEmail } from "@/lib/user";
 import bcrypt from "bcryptjs";
 import Google from "next-auth/providers/google";
 import type { NextAuthConfig } from "next-auth";
+import prisma from "./lib/db";
 
 export default {
   providers: [
@@ -13,30 +13,44 @@ export default {
     }),
     Credentials({
       async authorize(credentials) {
-        // runs on login
+        // Validate the credentials using the LoginSchema
+        const result = LoginSchema.safeParse(credentials);
 
-        // validation
-        const validatedFormData = LoginSchema.safeParse(credentials);
-        if (!validatedFormData.success) {
+        if (!result.success) {
           return null;
         }
 
-        // extract values
-        const { email, password } = validatedFormData.data;
+        const { email, password } = result.data;
 
-        const user = await getUserByEmail(email);
-        if (!user) {
-          console.log("No user found");
+        // Find the user by email
+        const user = await prisma.user.findUnique({
+          where: { email },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            password: true,
+            role: true,
+          },
+        });
+
+        if (!user || !user.password) {
           return null;
         }
 
-        const passwordsMatch = await bcrypt.compare(password, user.password);
-        if (!passwordsMatch) {
-          console.log("Invalid credentials");
+        // Compare the provided password with the stored hashed password
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        if (!passwordMatch) {
           return null;
         }
 
-        return user;
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        };
       },
     }),
   ],

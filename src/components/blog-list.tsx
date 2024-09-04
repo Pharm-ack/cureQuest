@@ -11,8 +11,6 @@ export default async function BlogList({
 }) {
   const currentPage = Number(searchParams.page) || 1;
 
-  console.log("current page", currentPage);
-
   const { posts, totalPages } = await getPosts(currentPage);
 
   if (!posts || posts.length === 0) {

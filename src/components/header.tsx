@@ -14,6 +14,7 @@ import {
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { MdMenu } from "react-icons/md";
+import { logout } from "@/actions/action";
 
 const routes = [
   {
@@ -37,6 +38,7 @@ const routes = [
 
 export default function Header() {
   const { data: session } = useSession();
+
   return (
     <header className="bg-gray-900 text-white">
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
@@ -83,18 +85,23 @@ export default function Header() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>My Account</DropdownMenuLabel>
                       <DropdownMenuSeparator />
+                      {session?.user.email === "Pharm@outlook.com" && (
+                        <DropdownMenuItem>
+                          <Link href="/dashboard/profile">Profile</Link>
+                        </DropdownMenuItem>
+                      )}
+
                       <DropdownMenuItem>
-                        <Link href="/dashboard/profile">Profile</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <button onClick={() => signOut({callbackUrl: "/login"})}>Logout</button>
+                        <form action={logout}>
+                          <button type="submit">Logout</button>
+                        </form>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
                   <Link
                     className="inline-flex h-9 text-gray-900 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm shadow-md transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 font-semibold"
-                    href="/register"
+                    href="/auth/register"
                   >
                     Join Now
                   </Link>
@@ -119,7 +126,6 @@ export default function Header() {
                         </Link>
                       </li>
                     ))}
-                    
                   </ul>
                 </SheetContent>
               </Sheet>

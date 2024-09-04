@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CheckIcon } from "@radix-ui/react-icons";
-// import { Check } from "lucide-react";
 import Link from "next/link";
 
 export default function SuccessRoute() {
@@ -19,7 +18,7 @@ export default function SuccessRoute() {
             </h3>
             <p className="mt-2 text-sm text-muted-foreground">
               Your payment has been successfully processed. Thanks for your
-              support!
+              patronage
             </p>
 
             <Button asChild className="w-full mt-5 sm:mt-6">

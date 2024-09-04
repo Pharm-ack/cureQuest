@@ -1,28 +1,27 @@
 import { z } from "zod";
 
 export const LoginSchema = z.object({
-  email: z.string().email({
-    message: "Please enter a valid email address",
-  }),
-  password: z.string().min(1, {
-    message: "Please enter your password",
-  }),
+  email: z.string().email(),
+  password: z.string().min(8),
 });
 
-export const RegisterSchema = z.object({
-  name: z.string().min(3, {
-    message: "Please enter your name",
-  }),
-  email: z
-    .string({ required_error: "Email is required" })
-    .min(1, "Email is required")
-    .email("Invalid email"),
-  password: z
-    .string({ required_error: "Password is required" })
-    .min(1, "Password is required")
-    .min(4, "Password must be more than 8 characters")
-    .max(32, "Password must be less than 32 characters"),
-});
+export const RegisterSchema = z
+  .object({
+    name: z
+      .string({ required_error: "Name is required" })
+      .min(3, { message: "Name must be at least 3 characters long" }),
+    email: z.string().email({ message: "Invalid email address" }),
+    password: z
+      .string()
+      .min(8, { message: "Password must be at least 8 characters long" }),
+    confirmPassword: z
+      .string()
+      .min(8, { message: "Password must be at least 8 characters long" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 export const PostSchema = z.object({
   title: z.string().min(1, "Title is required"),

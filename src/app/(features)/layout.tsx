@@ -4,6 +4,7 @@ import "../globals.css";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { SessionProvider } from "next-auth/react";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,6 +25,7 @@ export default function RootLayout({
           <Header />
         </SessionProvider>
         {children}
+        <Toaster position="top-right" />
         <Footer />
       </body>
     </html>

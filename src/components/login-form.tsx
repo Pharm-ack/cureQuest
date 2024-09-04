@@ -1,106 +1,197 @@
 "use client";
-
+import { useForm } from "@conform-to/react";
+import { parseWithZod } from "@conform-to/zod";
+import { useFormState } from "react-dom";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { AnimatePresence, motion } from "framer-motion";
+import { Icon } from "@iconify/react";
 import Link from "next/link";
-
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import Image from "next/image";
-import { googleLogin, login } from "@/actions/action";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
 import { LoginSchema } from "@/schema";
-import { z } from "zod";
-import FormError from "./ui/form-error";
-import { useRouter, useSearchParams } from "next/navigation";
-import { toast } from "sonner";
-import SiginBtn from "./sigin-btn";
-import { RiChromeLine, RiGoogleFill } from "react-icons/ri";
-import { Separator } from "./ui/separator";
-import { Button } from "./ui/button";
 
-export default function LoginForm() {
-  const searchParams = useSearchParams();
-  const urlError =
-    searchParams.get("error") === "OAuthAccountNotLinked"
-      ? "Email is already registered with another account"
-      : "";
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<z.infer<typeof LoginSchema>>({
-    resolver: zodResolver(LoginSchema),
-    defaultValues: {},
-  });
+import PendingButton from "./pending-button";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import Social from "./socials";
+import { login } from "@/actions/action";
+
+type FormState = {
+  status: "success" | "error" | undefined;
+  message: string;
+};
+
+export default function SignInForm() {
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [urlError, setUrlError] = useState<string | null>(null);
+
   const router = useRouter();
 
-  async function onSubmit(values: z.infer<typeof LoginSchema>) {
-    const response = (await login(values.email, values.password)) as any;
-
-    if (response?.error) {
-      toast.error("Error", {
-        description: "Invalid credentials, please try again",
-      });
-      return;
+  const [formState, action] = useFormState<FormState, FormData>(
+    async (prevState, formData) => {
+      const result = await login(prevState, formData);
+      if (result.status === "success") {
+        toast.success(result.message);
+        router.push("/");
+      } else if (result.status === "error") {
+        toast.error(result.message);
+      }
+      return result;
+    },
+    {
+      status: undefined,
+      message: "",
     }
+  );
+  const [form, fields] = useForm({
+    lastResult: formState,
 
-    if (!response?.error) {
-      router.push("/");
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema: LoginSchema });
+    },
+
+    shouldValidate: "onBlur",
+    shouldRevalidate: "onInput",
+  });
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const error = searchParams.get("error");
+    if (error === "OAuthAccountNotLinked") {
+      setUrlError("Email already in use with different provider!");
     }
+  }, []);
 
-    toast.success("You are now signed in!");
-  }
+  useEffect(() => {
+    if (urlError) {
+      toast.error(urlError);
+      setUrlError(null);
+    }
+  }, [urlError]);
+
+  const variants = {
+    visible: { opacity: 1, y: 0 },
+    hidden: { opacity: 0, y: 10 },
+  };
+
+  const orDivider = (
+    <div className="flex items-center gap-4 py-2">
+      <Separator className="flex-1" />
+      <p className="shrink-0 text-xs text-muted-foreground">OR</p>
+      <Separator className="flex-1" />
+    </div>
+  );
 
   return (
-    <div className="mx-auto px-2 max-w-[450px] space-y-4">
-      <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold">Login</h1>
-        <p className="text-muted-foreground">Login with your account.</p>
-      </div>
-      <div>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              {...register("email")}
-              id="email"
-              type="email"
-              name="email"
-              placeholder="Johndoe@mail.com"
-            />
-            {errors.email && (
-              <FormError>{String(errors.email.message)}</FormError>
-            )}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              {...register("password")}
-              id="password"
-              type="password"
-              name="password"
-              placeholder="********"
-            />
-            {errors.password && (
-              <FormError>{String(errors.password.message)}</FormError>
-            )}
-          </div>
-          <Button type="submit" className="w-full">
-            Login
-          </Button>
-        </form>
-        <Separator className="my-5" />
+    <div className="flex h-full w-full items-center justify-center">
+      <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg bg-card px-8 pb-10 pt-6 shadow-md">
+        <h1 className="mb-4 text-xl font-medium">Log In</h1>
+        <AnimatePresence initial={false} mode="popLayout">
+          {isFormVisible ? (
+            <motion.form
+              id={form.id}
+              onSubmit={form.onSubmit}
+              action={action}
+              noValidate
+              animate="visible"
+              className="flex flex-col gap-y-3"
+              exit="hidden"
+              initial="hidden"
+              variants={variants}
+            >
+              <div className="relative">
+                <Input
+                  required
+                  placeholder="Email Address"
+                  type="email"
+                  key={fields.email.key}
+                  name={fields.email.name}
+                  defaultValue={fields.email.initialValue}
+                  className={fields.email.errors ? "pr-24" : ""}
+                />
+                {fields.email.errors && (
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <span className="text-red-500 text-xs">
+                      {fields.email.errors}
+                    </span>
+                  </div>
+                )}
+              </div>
 
-        <SiginBtn onClick={() => googleLogin()}>
-          <RiChromeLine className="mr-2 h-4 w-4" />
-          Login with Google
-        </SiginBtn>
-        <div className="mt-4 text-center text-sm">
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="font-semibold hover:underline">
-            Register
-          </Link>
-        </div>
+              <div className="relative ">
+                <Input
+                  required
+                  placeholder="Password"
+                  type={showPassword ? "text" : "password"}
+                  key={fields.password.key}
+                  name={fields.password.name}
+                  defaultValue={fields.password.initialValue}
+                  className={fields.password.errors ? "pr-24" : ""}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 py-2"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+                {fields.password.errors && (
+                  <div className="absolute inset-y-0 right-8 pr-3 flex items-center pointer-events-none">
+                    <span className="text-red-500 text-xs">
+                      {fields.password.errors}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <PendingButton>Login In</PendingButton>
+              {orDivider}
+              <Button
+                className="w-full"
+                variant="outline"
+                onClick={() => setIsFormVisible(false)}
+              >
+                <Icon className="mr-2 h-4 w-4" icon="solar:arrow-left-linear" />
+                Other Login options
+              </Button>
+            </motion.form>
+          ) : (
+            <>
+              <Button className="w-full" onClick={() => setIsFormVisible(true)}>
+                <Icon className="mr-2 h-4 w-4" icon="solar:letter-bold" />
+                Continue with Email
+              </Button>
+              {orDivider}
+              <motion.div
+                animate="visible"
+                className="flex flex-col gap-y-2"
+                exit="hidden"
+                initial="hidden"
+                variants={variants}
+              >
+                <Social />
+                <p className="mt-3 text-center text-sm">
+                  Need to create an account?&nbsp;
+                  <Link
+                    href="/auth/register"
+                    className="text-primary hover:underline"
+                  >
+                    Sign Up
+                  </Link>
+                </p>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

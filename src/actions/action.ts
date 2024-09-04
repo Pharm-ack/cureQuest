@@ -1,9 +1,13 @@
 "use server";
 
-import { auth, signIn } from "@/auth";
+import { auth, signIn, signOut } from "@/auth";
 import prisma from "@/lib/db";
-import { getUserByEmail } from "@/lib/user";
-import { DonationSchema, PostSchema, RegisterSchema } from "@/schema";
+import {
+  DonationSchema,
+  LoginSchema,
+  PostSchema,
+  RegisterSchema,
+} from "@/schema";
 import bcrypt from "bcryptjs";
 import { AuthError } from "next-auth";
 import { revalidatePath } from "next/cache";
@@ -11,68 +15,114 @@ import { redirect } from "next/navigation";
 import { parseWithZod } from "@conform-to/zod";
 import { stripe } from "@/lib/stripe";
 
-// -- User Login ---
+type FormState = {
+  status: "success" | "error" | undefined;
+  message: string;
+};
+
+export async function register(
+  prevState: unknown,
+  formData: FormData
+): Promise<FormState> {
+  const submission = parseWithZod(formData, {
+    schema: RegisterSchema,
+  });
+
+  if (submission.status !== "success") {
+    return {
+      status: "error",
+      message: "Validation failed. Please check your inputs.",
+    };
+  }
+
+  const { name, email, password } = submission.value;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (user) {
+      return {
+        status: "error",
+        message: "Email already exists",
+      };
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        image: "",
+      },
+    });
+
+    return {
+      status: "success",
+      message: "User created successfully",
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: "Something went wrong",
+    };
+  }
+}
 
 export async function login(
-  email: string,
-  password: string,
-  redirect: boolean = false,
-  callbackUrl: string = "/"
-) {
+  prevState: unknown,
+  formData: FormData
+): Promise<FormState> {
+  const submission = parseWithZod(formData, {
+    schema: LoginSchema,
+  });
+
+  if (submission.status !== "success") {
+    return {
+      status: "error",
+      message: "Validation failed. Please check your inputs.",
+    };
+  }
+
+  const { email, password } = submission.value;
   try {
-    await signIn("credentials", { email, password, redirect, callbackUrl });
+    await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    return {
+      status: "success",
+      message: "User logged in successfully",
+    };
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin":
-          return "Invalid credentials.";
+          return {
+            status: "error",
+            message: "Invalid email or password",
+          };
         default:
-          return "Something went wrong.";
+          return {
+            status: "error",
+            message: "Something went wrong",
+          };
       }
     }
     throw error;
   }
-  // return { success: true };
 }
 
-//  -- User Sigin Up --
-export async function signup(formData: FormData) {
-  const data = {
-    name: formData.get("name"),
-    email: formData.get("email"),
-    password: formData.get("password"),
-  };
-
-  const validatedUser = RegisterSchema.safeParse(data);
-
-  if (!validatedUser.success) {
-    return { error: "Invalid fields!" };
-  }
-
-  const { email, password, name } = validatedUser.data;
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const existingUser = await getUserByEmail(email);
-
-  if (existingUser) {
-    return { error: "Email already exists!" };
-  }
-
-  await prisma.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-      name,
-    },
-  });
+export async function logout() {
+  await signOut();
 }
-
-export async function googleLogin() {
-  await signIn("google", { callbackUrl: "/" });
-}
-
-// --- Create Action --- //
 
 export async function createPost(formData: FormData) {
   const session = await auth();
@@ -196,14 +246,14 @@ export async function deletePost(postId: string) {
 }
 
 export async function deleteUser(userId: string) {
+  const session = await auth();
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    });
-
     // If the user is an admin, prevent deletion
-    if (user && user.role !== "ADMIN") {
+    if (
+      !session ||
+      !session.user ||
+      session.user.email !== "Pharm@outlook.com"
+    ) {
       return { error: "Only admin can perform this action." };
     }
 
