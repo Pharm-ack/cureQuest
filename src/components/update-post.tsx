@@ -17,13 +17,12 @@ import { createUploadThingHook } from "@/lib/uploadthing";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
-// Ensure the correct types for props
 interface UpdatePostFormProps {
   postId: string;
 }
 
 const uploadHook = createUploadThingHook({
-  url: "http://localhost:3000/api/uploadthing",
+  url: "https://cure-quest-ph.vercel.app/api/uploadthing",
 });
 
 const UpdatePostForm: React.FC<UpdatePostFormProps> = ({ postId }) => {
