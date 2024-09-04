@@ -20,7 +20,7 @@ import dynamic from "next/dynamic";
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
 const uploadHook = createUploadThingHook({
-  url: "http://localhost:3000/api/uploadthing",
+  url: "https://cure-quest-ph.vercel.app/api/uploadthing",
 });
 
 export default function PostForm() {
